@@ -1,0 +1,62 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: seguridad-auth-module
+
+  datasource:
+    url: jdbc:h2:mem:seguridad_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+
+  cache:
+    type: caffeine
+    cache-names:
+      - user_authorities
+      - system_config
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30m
+
+# Configuración personalizada de seguridad y tokens JWT
+application:
+  security:
+    jwt:
+      # Clave secreta Base64 de 512 bits segura para HMAC-SHA512
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D6351655468576D5A7134743777217A25432A
+      access-token-expiration-ms: 900000      # 15 minutos (en milisegundos)
+      refresh-token-expiration-ms: 604800000  # 7 días (en milisegundos)
+      cookie-name: app_refresh_token
+    rate-limit:
+      max-attempts-per-minute: 10
+      window-duration-minutes: 1
+    brute-force:
+      max-failed-attempts: 5
+      lock-duration-minutes: 15
+    cors:
+      allowed-origins:
+        - "http://localhost:4200"
+        - "http://127.0.0.1:4200"
